@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+
+<html>
+<!-- CSS Styles-->
+<style>
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+th, td {
+    text-align: left;
+    padding: 8px;
+}
+
+tr:nth-child(even){background-color: #f2f2f2}
+
+th {
+    background-color: #04AA6D;
+    color: white;
+}
+</style>
+
+<!-- Java Script -->
+<script>
+
+var myList = [];
+function loadDoc() {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+    
+      myList = JSON.parse(this.responseText);
+      buildHtmlTable('#excelDataTable');
+    
+    }
+  };
+  xhttp.open("GET", "http://localhost:8081/employee", true);
+  xhttp.send();
+}
+
+
+
+
+// Builds the HTML Table out of myList.
+function buildHtmlTable(selector) {
+  var columns = addAllColumnHeaders(myList, selector);
+
+  for (var i = 0; i < myList.length; i++) {
+    var row$ = $('<tr/>');
+    for (var colIndex = 0; colIndex < columns.length; colIndex++) {
+      var cellValue = myList[i][columns[colIndex]];
+      if (cellValue == null) cellValue = "";
+      row$.append($('<td/>').html(cellValue));
+    }
+    $(selector).append(row$);
+  }
+}
+
+// Adds a header row to the table and returns the set of columns.
+// Need to do union of keys from all records as some records may not contain
+// all records.
+function addAllColumnHeaders(myList, selector) {
+  var columnSet = [];
+  var headerTr$ = $('<tr/>');
+
+  for (var i = 0; i < myList.length; i++) {
+    var rowHash = myList[i];
+    for (var key in rowHash) {
+      if ($.inArray(key, columnSet) == -1) {
+        columnSet.push(key);
+        headerTr$.append($('<th/>').html(key));
+      }
+    }
+  }
+  $(selector).append(headerTr$);
+
+  return columnSet;
+}
+
+
+</script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+
+<!-- HTML Body-->
+<body>
+
+    <div>
+        <button type="button" onclick="loadDoc()">Employee Details</button>
+        <br> <br>
+    </div>
+
+    <table id="excelDataTable" border="1">
+    </table>
+</body>
+
+</html>
